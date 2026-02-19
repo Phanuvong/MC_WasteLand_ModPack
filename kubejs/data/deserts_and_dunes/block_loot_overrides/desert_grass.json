@@ -1,0 +1,14 @@
+{
+  "type": "deserts_and_dunes:desert_grass",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "tough_beginnings:plantfiber"
+        }
+      ]
+    }
+  ]
+}

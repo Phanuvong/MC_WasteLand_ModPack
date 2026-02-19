@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": ["hardmodeores:richdiamondore","hardmodeores:richdeepslatediamondore"],
+  "remove": [
+    "minecraft:diamond_ore",
+    "minecraft:deepslate_diamond_ore",
+  ]
+}

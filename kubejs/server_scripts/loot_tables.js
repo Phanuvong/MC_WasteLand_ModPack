@@ -1,31 +1,76 @@
-// Located in: kubejs/server_scripts/loot_tables.js
-
-LootJS.modifiers(event => {
+ServerEvents.blockLootTables(event => {
   
-  // 1. Standard Diamond Ore -> Diamond Shards
-  // Only drops if harvested with a Diamond-tier tool (handled by tags)
-  event.addBlockLootModifier('minecraft:diamond_ore')
-    .removeLoot('minecraft:diamond') // Remove default diamond
-    .not(n => n.hasEnchantment('minecraft:silk_touch'))
-    .addWeightedLoot([2, 2], 'hardmodeores:diamondshard')
-    .applyFortuneBonus();
+  // 1. Diamond Ore -> 2 Diamond Shards
+  // Replicates diamond_ore.json logic
+  event.addBlock('minecraft:diamond_ore', loot => {
+    loot.addPool(pool => {
+      // Entry 1: Silk Touch (Drops Ore)
+      pool.addItem('minecraft:diamond_ore').addCondition({
+        condition: "minecraft:match_tool",
+        predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+      })
+      
+      // Entry 2: Default (Drops 2 Shards + Fortune)
+      pool.addItem('hardmodeores:diamondshard')
+        .count([2, 2])
+        .addFunction({
+          function: "minecraft:apply_bonus",
+          enchantment: "minecraft:fortune",
+          formula: "minecraft:ore_drops"
+        })
+        .addCondition({
+          condition: "minecraft:inverted",
+          term: {
+            condition: "minecraft:match_tool",
+            predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+          }
+        })
+    })
+  })
 
-  // 2. Rich Diamond Ore Logic
-  event.addBlockLootModifier('hardmodeores:richdiamondore')
-    .matchMainHand('#minecraft:needs_diamond_tool')
-    .replaceLoot('hardmodeores:richdiamondore', 'minecraft:diamond_ore', true) // Replaces if NOT silk touch
-    .modifyLoot('minecraft:diamond_ore', (stack) => {
-       // Logic for fortune on the rich ore drop
-       return stack;
-    });
-
-  // 3. Rich Deepslate Diamond Ore Logic
-  event.addBlockLootModifier('hardmodeores:richdeepslatediamondore')
-    .matchMainHand('#minecraft:needs_diamond_tool')
-    .alt(
+  // 2. Rich Diamond Ore -> Diamond Ore Block
+  // Replicates richdiamondore.json logic
+  event.addBlock('hardmodeores:richdiamondore', loot => {
+    loot.addPool(pool => {
       // Silk Touch case
-      item => item.hasEnchantment('minecraft:silk_touch').addLoot('hardmodeores:richdeepslatediamondore'),
+      pool.addItem('hardmodeores:richdiamondore').addCondition({
+        condition: "minecraft:match_tool",
+        predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+      })
       // Default case
-      item => item.addLoot('minecraft:diamond').applyFortuneBonus()
-    );
-});
+      pool.addItem('minecraft:diamond_ore')
+        .addFunction({ function: "minecraft:apply_bonus", enchantment: "minecraft:fortune", formula: "minecraft:ore_drops" })
+        .addFunction({ function: "minecraft:explosion_decay" })
+        .addCondition({
+          condition: "minecraft:inverted",
+          term: {
+            condition: "minecraft:match_tool",
+            predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+          }
+        })
+    })
+  })
+
+  // 3. Rich Deepslate Diamond Ore -> Diamond
+  // Replicates richdeepslatediamondore.json logic
+  event.addBlock('hardmodeores:richdeepslatediamondore', loot => {
+    loot.addPool(pool => {
+      // Silk Touch case
+      pool.addItem('hardmodeores:richdeepslatediamondore').addCondition({
+        condition: "minecraft:match_tool",
+        predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+      })
+      // Default case
+      pool.addItem('minecraft:diamond')
+        .addFunction({ function: "minecraft:apply_bonus", enchantment: "minecraft:fortune", formula: "minecraft:ore_drops" })
+        .addFunction({ function: "minecraft:explosion_decay" })
+        .addCondition({
+          condition: "minecraft:inverted",
+          term: {
+            condition: "minecraft:match_tool",
+            predicate: { enchantments: [{ enchantment: "minecraft:silk_touch", levels: { min: 1 } }] }
+          }
+        })
+    })
+  })
+})
