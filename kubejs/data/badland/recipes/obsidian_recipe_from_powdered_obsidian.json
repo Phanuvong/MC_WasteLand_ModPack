@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "###",
+        "###",
+        "###"
+    ],
+    "key": {
+        "#": {
+            "item": "create:powdered_obsidian"
+        }
+    },
+    "result": {
+        "item": "minecraft:obsidian",
+        "count": 1
+    }
+}
+

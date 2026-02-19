@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "deserts_and_dunes:saguaro_cactus",
+    "deserts_and_dunes:fan_palm_log",
+    "deserts_and_dunes:saguaro_planks",
+    "deserts_and_dunes:fan_palm_planks",
+    "deserts_and_dunes:yucca_planks",
+    "deserts_and_dunes:joshua_planks",
+    "deserts_and_dunes:palo_verde_planks",
+    "deserts_and_dunes:boojum_planks"
+  ]
+}
