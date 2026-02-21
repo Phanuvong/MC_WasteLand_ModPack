@@ -1,0 +1,84 @@
+// ===== DISABLE ENCHANTMENTS BUT KEEP ANVILS WORKING =====
+
+// 1. Remove from enchanting table using MoreJS
+MoreJSEvents.filterAvailableEnchantments(event => {
+    // Remove ALL enchantments from enchanting table
+    event.removeAll();
+    console.log('All enchantments removed from enchanting table');
+});
+
+// 2. Use ForgeEvents to control anvil behavior without breaking it
+ForgeEvents.onEvent('net.minecraftforge.event.entity.player.AnvilRepairEvent', event => {
+    // This event fires when an anvil repair happens
+    // We don't need to cancel anything - just let it work
+});
+
+// 3. Remove enchantments from items in inventory (periodic check)
+ServerEvents.tick(event => {
+    event.server.players.forEach(player => {
+        player.inventory.allItems.forEach(item => {
+            if (item && item.enchanted) {
+                try {
+                    item.enchantments.clear();
+                } catch (e) {
+                    if (item.components) {
+                        item.components.remove('minecraft:enchantments');
+                    }
+                }
+            }
+        });
+    });
+});
+
+// 4. Remove enchantments when items are picked up
+PlayerEvents.inventoryChanged(event => {
+    const { item } = event;
+    
+    if (item && item.enchanted) {
+        try {
+            item.enchantments.clear();
+        } catch (e) {
+            if (item.components) {
+                item.components.remove('minecraft:enchantments');
+            }
+        }
+    }
+});
+
+// 5. Remove enchantments from dropped items
+EntityEvents.spawned(event => {
+    const { entity } = event;
+    
+    // Check if it's an item entity
+    if (entity.type === 'minecraft:item') {
+        const item = entity.item;
+        if (item && item.enchanted) {
+            try {
+                item.enchantments.clear();
+            } catch (e) {
+                if (item.components) {
+                    item.components.remove('minecraft:enchantments');
+                }
+            }
+        }
+    }
+});
+
+// 6. Remove enchanting table recipe but KEEP anvil recipe
+ServerEvents.recipes(event => {
+    event.remove({ output: 'minecraft:enchanting_table' });
+    // DO NOT remove anvil recipe
+    // event.remove({ output: 'minecraft:anvil' }); // Commented out
+    event.remove({ output: 'minecraft:enchanted_book' });
+});
+
+// 7. Remove enchanted books from loot
+LootJS.modifiers(event => {
+    event.addLootTypeModifier(LootType.CHEST)
+        .removeLoot('minecraft:enchanted_book');
+    
+    event.addLootTypeModifier(LootType.ENTITY)
+        .removeLoot('minecraft:enchanted_book');
+});
+
+console.log('Enchantment removal script loaded - Anvils fully functional!');
